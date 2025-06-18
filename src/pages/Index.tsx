@@ -14,49 +14,46 @@ import { useAuthStore } from '@/stores/authStore';
 const Index = () => {
   const { isAuthenticated, user } = useAuthStore();
 
-  return (
-    <div>
+  if (!isAuthenticated) {
+    return (
       <Routes>
-        {!isAuthenticated ? (
-          <>
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="*" element={<Navigate to="/login" replace />} />
-          </>
-        ) : (
-          <>
-            <Route path="/" element={
-              <Layout>
-                <Dashboard />
-              </Layout>
-            } />
-            <Route path="/upload" element={
-              <Layout>
-                <FileUpload />
-              </Layout>
-            } />
-            {user?.role === 'admin' && (
-              <>
-                <Route path="/admin" element={
-                  <Layout>
-                    <AdminModule />
-                  </Layout>
-                } />
-                <Route path="/reports" element={
-                  <Layout>
-                    <ReportsModule />
-                  </Layout>
-                } />
-              </>
-            )}
-            <Route path="/login" element={<Navigate to="/" replace />} />
-            <Route path="/register" element={<Navigate to="/" replace />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </>
-        )}
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
-      <Toaster />
-    </div>
+    );
+  }
+
+  return (
+    <Routes>
+      <Route path="/" element={
+        <Layout>
+          <Dashboard />
+        </Layout>
+      } />
+      <Route path="/upload" element={
+        <Layout>
+          <FileUpload />
+        </Layout>
+      } />
+      {user?.role === 'admin' && (
+        <>
+          <Route path="/admin" element={
+            <Layout>
+              <AdminModule />
+            </Layout>
+          } />
+          <Route path="/reports" element={
+            <Layout>
+              <ReportsModule />
+            </Layout>
+          } />
+        </>
+      )}
+      <Route path="/login" element={<Navigate to="/" replace />} />
+      <Route path="/register" element={<Navigate to="/" replace />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 };
 
