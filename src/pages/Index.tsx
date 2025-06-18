@@ -18,20 +18,36 @@ const Index = () => {
   }
 
   return (
-    <Layout>
+    <div>
       <Routes>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/upload" element={<FileUpload />} />
+        <Route path="/" element={
+          <Layout>
+            <Dashboard />
+          </Layout>
+        } />
+        <Route path="/upload" element={
+          <Layout>
+            <FileUpload />
+          </Layout>
+        } />
         {user?.role === 'admin' && (
           <>
-            <Route path="/admin" element={<AdminModule />} />
-            <Route path="/reports" element={<ReportsModule />} />
+            <Route path="/admin" element={
+              <Layout>
+                <AdminModule />
+              </Layout>
+            } />
+            <Route path="/reports" element={
+              <Layout>
+                <ReportsModule />
+              </Layout>
+            } />
           </>
         )}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <Toaster />
-    </Layout>
+    </div>
   );
 };
 
