@@ -28,9 +28,12 @@ const Layout = ({ children }: LayoutProps) => {
   const navigation = [
     { name: 'Dashboard', href: '/', icon: Home },
     { name: 'Upload Files', href: '/upload', icon: FileUp },
+    { name: 'Create User', href: '/register', icon: BarChart3 },
     ...(user?.role === 'admin' ? [
       { name: 'Admin Panel', href: '/admin', icon: Users },
-      { name: 'Reports', href: '/reports', icon: BarChart3 }
+      { name: 'Reports', href: '/reports', icon: BarChart3 },
+      { name: 'Create User', href: '/register', icon: BarChart3 }
+
     ] : [])
   ];
 
@@ -64,7 +67,7 @@ const Layout = ({ children }: LayoutProps) => {
         <div className="lg:hidden">
           <div className="flex items-center justify-between p-4 bg-white shadow">
             <h1 className="text-xl font-semibold text-gray-900">
-              Employee File System
+              Employee File Systems
             </h1>
             <SheetTrigger asChild>
               <Button variant="outline" size="icon">

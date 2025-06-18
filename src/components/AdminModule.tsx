@@ -14,6 +14,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { useEffect } from 'react';
+import axios from 'axios';
 
 interface Employee {
   id: string;
@@ -26,41 +28,36 @@ interface Employee {
 }
 
 const AdminModule = () => {
-  const [employees, setEmployees] = useState<Employee[]>([
-    {
-      id: '1',
-      username: 'john.doe',
-      email: 'john.doe@company.com',
-      role: 'employee',
-      status: 'active',
-      department: 'Engineering',
-      joinDate: '2023-01-15'
-    },
-    {
-      id: '2',
-      username: 'jane.smith',
-      email: 'jane.smith@company.com',
-      role: 'employee',
-      status: 'active',
-      department: 'HR',
-      joinDate: '2023-03-20'
-    },
-    {
-      id: '3',
-      username: 'mike.wilson',
-      email: 'mike.wilson@company.com',
-      role: 'employee',
-      status: 'inactive',
-      department: 'Finance',
-      joinDate: '2022-11-08'
-    }
-  ]);
+  const [employees, setEmployees] = useState<Employee[]>([]);
   
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
+
+  useEffect(() => {
+  const fetchEmployees = async () => {
+    try {
+      const res = await axios.get('http://localhost:3002/api/admin/employees', {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}` // Or however you store it
+        }
+      });
+      setEmployees(res.data);
+    } catch (err) {
+      console.error('Failed to fetch employees:', err);
+      toast({
+        title: 'Error',
+        description: 'Unable to fetch employees.',
+        variant: 'destructive'
+      });
+    }
+  };
+
+  fetchEmployees();
+}, []);
+
 
   const filteredEmployees = employees.filter(employee => {
     const matchesSearch = employee.username.toLowerCase().includes(searchTerm.toLowerCase()) ||

@@ -1,4 +1,3 @@
-
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
@@ -12,7 +11,10 @@ export interface User {
 
 interface AuthState {
   user: User | null;
+  token: string | null;
   isAuthenticated: boolean;
+  setToken: (token: string) => void;
+  setUser: (user: User) => void;
   login: (username: string, password: string) => Promise<boolean>;
   register: (username: string, email: string, password: string) => Promise<boolean>;
   logout: () => void;
@@ -22,27 +24,29 @@ export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
       user: null,
+      token: null,
       isAuthenticated: false,
+
+      setToken: (token: string) => {
+        set({ token, isAuthenticated: true });
+      },
+
+      setUser: (user: User) => {
+        set({ user });
+      },
+
       login: async (username: string, password: string) => {
-        // This will be replaced with actual authentication when Supabase is connected
-        const mockUser: User = {
-          id: '1',
-          username,
-          email: `${username}@company.com`,
-          role: username === 'admin' ? 'admin' : 'employee',
-          status: 'active'
-        };
-        
-        set({ user: mockUser, isAuthenticated: true });
-        return true;
+        // This should now be handled in the component using axios
+        return false;
       },
+
       register: async (username: string, email: string, password: string) => {
-        // This will be replaced with actual registration when Supabase is connected
-        // For now, just return success
-        return true;
+        // Should be handled in the component using axios
+        return false;
       },
+
       logout: () => {
-        set({ user: null, isAuthenticated: false });
+        set({ user: null, token: null, isAuthenticated: false });
       }
     }),
     {

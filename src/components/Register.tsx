@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -7,10 +6,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Lock, User, Mail, UserPlus } from 'lucide-react';
+import axios from 'axios';
 
 const Register = () => {
   const [formData, setFormData] = useState({
     username: '',
+    role: '',
     email: '',
     password: '',
     confirmPassword: ''
@@ -22,7 +23,6 @@ const Register = () => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Validation
     if (formData.password !== formData.confirmPassword) {
       toast({
         title: 'Registration failed',
@@ -44,23 +44,29 @@ const Register = () => {
     }
 
     try {
-      // This will be replaced with actual registration when Supabase is connected
+      await axios.post('http://localhost:3000/api/auth/register', {
+        username: formData.username,
+        role: formData.role,
+        email: formData.email,
+        password: formData.password
+      });
+
       toast({
         title: 'Registration successful',
         description: 'Please proceed to login with your credentials',
       });
-      
-      // Reset form
+
       setFormData({
         username: '',
+        role: '',
         email: '',
         password: '',
         confirmPassword: ''
       });
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: 'Registration error',
-        description: 'An error occurred during registration',
+        description: error.response?.data?.error || 'An error occurred during registration',
         variant: 'destructive',
       });
     } finally {
@@ -104,7 +110,26 @@ const Register = () => {
                 />
               </div>
             </div>
-            
+
+            <div className="space-y-2">
+              <Label htmlFor="role">Role</Label>
+              <select
+                id="role"
+                name="role"
+                value={formData.role}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, role: e.target.value }))
+                }
+                className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                required
+              >
+                <option value="">Select a role</option>
+                <option value="employee">Employee</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+
+
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <div className="relative">
@@ -156,12 +181,13 @@ const Register = () => {
               </div>
             </div>
 
+
             <Button type="submit" className="w-full" disabled={isLoading}>
               <UserPlus className="mr-2 h-4 w-4" />
               {isLoading ? 'Creating Account...' : 'Create Account'}
             </Button>
           </form>
-          
+
           <div className="mt-4 text-center">
             <p className="text-sm text-gray-600">
               Already have an account?{' '}

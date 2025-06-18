@@ -1,43 +1,47 @@
-
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { useAuthStore } from '@/stores/authStore';
 import { useToast } from '@/hooks/use-toast';
-import { Lock, User } from 'lucide-react';
+import { Lock, Mail } from 'lucide-react';
+import axios from 'axios';
 
 const Login = () => {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { login } = useAuthStore();
+  const { setToken, setUser } = useAuthStore();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      const success = await login(username, password);
-      if (success) {
-        toast({
-          title: 'Login successful',
-          description: 'Welcome to the Employee File System',
-        });
-      } else {
-        toast({
-          title: 'Login failed',
-          description: 'Invalid username or password',
-          variant: 'destructive',
-        });
-      }
-    } catch (error) {
+      const response = await axios.post('http://localhost:3000/api/auth/login', {
+        email,
+        password
+      });
+
+      const { token, user } = response.data;
+
+      setToken(token);
+      setUser(user);
+
       toast({
-        title: 'Login error',
-        description: 'An error occurred during login',
+        title: 'Login successful',
+        description: `Welcome back, ${user.username || user.email}`,
+      });
+
+      navigate('/dashboard'); // Redirect after login
+    } catch (error: any) {
+      toast({
+        title: 'Login failed',
+        description: error.response?.data?.error || 'Invalid credentials',
         variant: 'destructive',
       });
     } finally {
@@ -59,15 +63,15 @@ const Login = () => {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
+              <Label htmlFor="email">Email</Label>
               <div className="relative">
-                <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <Input
-                  id="username"
+                  id="email"
                   type="text"
-                  placeholder="Enter your username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="pl-10"
                   required
                 />
@@ -92,7 +96,7 @@ const Login = () => {
               {isLoading ? 'Signing in...' : 'Sign In'}
             </Button>
           </form>
-          
+
           <div className="mt-4 text-center">
             <p className="text-sm text-gray-600">
               Don't have an account?{' '}
@@ -100,13 +104,12 @@ const Login = () => {
                 Create one here
               </Link>
             </p>
-          </div>
-          
+          {/* </div>
+
           <div className="mt-4 text-center text-sm text-gray-600">
             <p>Demo credentials:</p>
-            <p>Username: <code className="bg-gray-100 px-1 rounded">admin</code> (for admin access)</p>
-            <p>Username: <code className="bg-gray-100 px-1 rounded">employee</code> (for employee access)</p>
-            <p>Password: <code className="bg-gray-100 px-1 rounded">any password</code></p>
+            <p>Username: <code className="bg-gray-100 px-1 rounded">admin</code> or <code className="bg-gray-100 px-1 rounded">employee</code></p>
+            <p>Password: <code className="bg-gray-100 px-1 rounded">your password</code></p> */}
           </div>
         </CardContent>
       </Card>
