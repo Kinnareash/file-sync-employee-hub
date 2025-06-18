@@ -14,6 +14,7 @@ interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
   login: (username: string, password: string) => Promise<boolean>;
+  register: (username: string, email: string, password: string) => Promise<boolean>;
   logout: () => void;
 }
 
@@ -33,6 +34,11 @@ export const useAuthStore = create<AuthState>()(
         };
         
         set({ user: mockUser, isAuthenticated: true });
+        return true;
+      },
+      register: async (username: string, email: string, password: string) => {
+        // This will be replaced with actual registration when Supabase is connected
+        // For now, just return success
         return true;
       },
       logout: () => {

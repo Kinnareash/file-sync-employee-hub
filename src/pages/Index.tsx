@@ -8,43 +8,52 @@ import FileUpload from '@/components/FileUpload';
 import AdminModule from '@/components/AdminModule';
 import ReportsModule from '@/components/ReportsModule';
 import Login from '@/components/Login';
+import Register from '@/components/Register';
 import { useAuthStore } from '@/stores/authStore';
 
 const Index = () => {
   const { isAuthenticated, user } = useAuthStore();
 
-  if (!isAuthenticated) {
-    return <Login />;
-  }
-
   return (
     <div>
       <Routes>
-        <Route path="/" element={
-          <Layout>
-            <Dashboard />
-          </Layout>
-        } />
-        <Route path="/upload" element={
-          <Layout>
-            <FileUpload />
-          </Layout>
-        } />
-        {user?.role === 'admin' && (
+        {!isAuthenticated ? (
           <>
-            <Route path="/admin" element={
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="*" element={<Navigate to="/login" replace />} />
+          </>
+        ) : (
+          <>
+            <Route path="/" element={
               <Layout>
-                <AdminModule />
+                <Dashboard />
               </Layout>
             } />
-            <Route path="/reports" element={
+            <Route path="/upload" element={
               <Layout>
-                <ReportsModule />
+                <FileUpload />
               </Layout>
             } />
+            {user?.role === 'admin' && (
+              <>
+                <Route path="/admin" element={
+                  <Layout>
+                    <AdminModule />
+                  </Layout>
+                } />
+                <Route path="/reports" element={
+                  <Layout>
+                    <ReportsModule />
+                  </Layout>
+                } />
+              </>
+            )}
+            <Route path="/login" element={<Navigate to="/" replace />} />
+            <Route path="/register" element={<Navigate to="/" replace />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
           </>
         )}
-        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <Toaster />
     </div>
