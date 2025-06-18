@@ -1,13 +1,37 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+
+import React from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { Toaster } from '@/components/ui/toaster';
+import Layout from '@/components/Layout';
+import Dashboard from '@/components/Dashboard';
+import FileUpload from '@/components/FileUpload';
+import AdminModule from '@/components/AdminModule';
+import ReportsModule from '@/components/ReportsModule';
+import Login from '@/components/Login';
+import { useAuthStore } from '@/stores/authStore';
 
 const Index = () => {
+  const { isAuthenticated, user } = useAuthStore();
+
+  if (!isAuthenticated) {
+    return <Login />;
+  }
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
-    </div>
+    <Layout>
+      <Routes>
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/upload" element={<FileUpload />} />
+        {user?.role === 'admin' && (
+          <>
+            <Route path="/admin" element={<AdminModule />} />
+            <Route path="/reports" element={<ReportsModule />} />
+          </>
+        )}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+      <Toaster />
+    </Layout>
   );
 };
 
