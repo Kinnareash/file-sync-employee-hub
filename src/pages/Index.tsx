@@ -19,7 +19,7 @@ const Index = () => {
         {!isAuthenticated ? (
           <>
             <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
+            {/* <Route path="/register" element={<Register />} /> */}
             <Route path="*" element={<Navigate to="/login" replace />} />
           </>
         ) : (
@@ -57,6 +57,7 @@ const Index = () => {
             )}
 
             <Route path="/login" element={<Navigate to="/" replace />} />
+            {/* <Route path="/register" element={<Navigate to="/" replace />} /> */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </>
         )}

@@ -1,27 +1,30 @@
-// middleware/authMiddleware.js
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 
 dotenv.config();
 
-const verifyToken = (allowedRoles = []) => {  // Accept allowed roles as parameter
+const verifyToken = (allowedRoles = []) => {
   return (req, res, next) => {
     const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
+    const token = authHeader?.split(' ')[1]; // Expect: "Bearer <token>"
 
-    if (!token) return res.status(401).json({ message: 'Access token missing' });
+    if (!token) {
+      return res.status(401).json({ message: 'Access token missing' });
+    }
 
-    jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-      if (err) return res.status(403).json({ message: 'Invalid token' });
-      
-      // Role check (if allowedRoles is provided)
-      if (allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+      // Optional: role-based access check
+      if (allowedRoles.length > 0 && !allowedRoles.includes(decoded.role)) {
         return res.status(403).json({ message: 'Insufficient permissions' });
       }
 
-      req.user = user;
+      req.user = decoded; // Attach user info to request
       next();
-    });
+    } catch (err) {
+      return res.status(403).json({ message: 'Invalid or expired token' });
+    }
   };
 };
 

@@ -28,7 +28,7 @@ const Layout = ({ children }: LayoutProps) => {
   const navigation = [
     { name: 'Dashboard', href: '/', icon: Home },
     { name: 'Upload Files', href: '/upload', icon: FileUp },
-    { name: 'Create User', href: '/register', icon: BarChart3 },
+    // { name: 'Create User', href: '/register', icon: BarChart3 },
     ...(user?.role === 'admin' ? [
       { name: 'Admin Panel', href: '/admin', icon: Users },
       { name: 'Reports', href: '/reports', icon: BarChart3 },

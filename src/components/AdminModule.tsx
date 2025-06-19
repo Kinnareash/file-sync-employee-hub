@@ -39,9 +39,9 @@ const AdminModule = () => {
   useEffect(() => {
   const fetchEmployees = async () => {
     try {
-      const res = await axios.get('http://localhost:3002/api/admin/employees', {
+      const res = await axios.get('http://localhost:3000/api/admin/employees', {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}` // Or however you store it
+          Authorization: `Bearer ${localStorage.getItem('token')}` 
         }
       });
       setEmployees(res.data);
@@ -204,7 +204,7 @@ const AdminModule = () => {
                         <p className="text-sm text-gray-500">{employee.email}</p>
                       </div>
                     </td>
-                    <td className="p-4 text-gray-700">{employee.department}</td>
+                    <td className="p-4 text-gray-700">{employee.department|| <span className="text-gray-400 italic">N/A</span>}</td>
                     <td className="p-4">
                       <Badge variant={employee.role === 'admin' ? 'default' : 'secondary'}>
                         {employee.role}

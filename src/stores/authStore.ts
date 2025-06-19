@@ -16,7 +16,7 @@ interface AuthState {
   setToken: (token: string) => void;
   setUser: (user: User) => void;
   login: (username: string, password: string) => Promise<boolean>;
-  register: (username: string, email: string, password: string) => Promise<boolean>;
+  register: (username: string, email: string,role:string, password: string) => Promise<boolean>;
   logout: () => void;
 }
 
@@ -35,12 +35,12 @@ export const useAuthStore = create<AuthState>()(
         set({ user });
       },
 
-      login: async (username: string, password: string) => {
+      login: async (email: string, password: string) => {
         // This should now be handled in the component using axios
         return false;
       },
 
-      register: async (username: string, email: string, password: string) => {
+      register: async (username: string, email: string,role:string, password: string) => {
         // Should be handled in the component using axios
         return false;
       },

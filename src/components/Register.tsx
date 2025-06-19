@@ -7,8 +7,20 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Lock, User, Mail, UserPlus } from 'lucide-react';
 import axios from 'axios';
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuthStore } from '@/stores/authStore';
+
 
 const Register = () => {
+  const { token, user } = useAuthStore(); // get auth info from store
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!token || user?.role !== 'admin') {
+      navigate('/login'); // or navigate('/')
+    }
+  }, [token, user, navigate]);
   const [formData, setFormData] = useState({
     username: '',
     role: '',
@@ -44,11 +56,17 @@ const Register = () => {
     }
 
     try {
+      const token = localStorage.getItem('token'); // Or get it from Zustand store
+
       await axios.post('http://localhost:3000/api/auth/register', {
         username: formData.username,
         role: formData.role,
         email: formData.email,
         password: formData.password
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
       });
 
       toast({
