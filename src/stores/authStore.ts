@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { devtools, persist } from 'zustand/middleware';
 
 export interface User {
   id: string;
@@ -16,41 +16,48 @@ interface AuthState {
   setToken: (token: string) => void;
   setUser: (user: User) => void;
   login: (username: string, password: string) => Promise<boolean>;
-  register: (username: string, email: string,role:string, password: string) => Promise<boolean>;
+  register: (username: string, email: string, role: string, password: string) => Promise<boolean>;
   logout: () => void;
 }
 
 export const useAuthStore = create<AuthState>()(
-  persist(
-    (set) => ({
-      user: null,
-      token: null,
-      isAuthenticated: false,
+  devtools(
+    persist(
+      (set) => ({
+        user: null,
+        token: null,
+        isAuthenticated: false,
 
-      setToken: (token: string) => {
-        set({ token, isAuthenticated: true });
-      },
+        setToken: (token: string) => {
+          set({ token, isAuthenticated: true });
+        },
 
-      setUser: (user: User) => {
-        set({ user });
-      },
+        setUser: (user: User) => {
+          set({ user });
+        },
 
-      login: async (email: string, password: string) => {
-        // This should now be handled in the component using axios
-        return false;
-      },
+        login: async () => false,
+        register: async () => false,
 
-      register: async (username: string, email: string,role:string, password: string) => {
-        // Should be handled in the component using axios
-        return false;
-      },
-
-      logout: () => {
-        set({ user: null, token: null, isAuthenticated: false });
+        logout: () => {
+          set({ user: null, token: null, isAuthenticated: false });
+        },
+      }),
+      {
+        name: 'auth-storage',
+        storage: {
+          getItem: (name) => {
+            const item = localStorage.getItem(name);
+            return item ? JSON.parse(item) : null;
+          },
+          setItem: (name, value) => {
+            localStorage.setItem(name, JSON.stringify(value));
+          },
+          removeItem: (name) => {
+            localStorage.removeItem(name);
+          },
+        },
       }
-    }),
-    {
-      name: 'auth-storage'
-    }
+    )
   )
 );

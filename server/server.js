@@ -17,23 +17,7 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 app.use('/uploads', express.static('uploads'));
-app.use('/api/files', fileRoutes);
-// Multer setup
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'uploads/');
-  },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + path.extname(file.originalname));
-  }
-});
 
-const upload = multer({ storage });
-
-app.use((req, res, next) => {
-  req.upload = upload;
-  next();
-});
 
 // Routes
 app.use('/api/auth', authRoutes);

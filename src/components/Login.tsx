@@ -28,6 +28,12 @@ const Login = () => {
       });
 
       const { token, user } = response.data;
+      console.log("Login response:");         
+      console.log("Token:", token);            
+      console.log("User:", user);
+      if (!token || !user) {
+        throw new Error("Invalid login response");
+      }
 
       setToken(token);
       setUser(user);
@@ -104,7 +110,7 @@ const Login = () => {
                 Create one here
               </Link>
             </p>
-          {/* </div>
+            {/* </div>
 
           <div className="mt-4 text-center text-sm text-gray-600">
             <p>Demo credentials:</p>
