@@ -20,7 +20,7 @@ const storage = multer.diskStorage({
 const uploadMiddleware = multer({ storage }).array('files');
 
 // Exported controller
-const upload = multer({ storage }).array('files');
+// const upload = multer({ storage }).array('files');
 export const uploadFile = (req, res) => {
   console.log("📦 Upload endpoint called");
 
@@ -29,6 +29,10 @@ export const uploadFile = (req, res) => {
       console.error("❌ Multer error:", err);
       return res.status(500).json({ message: 'File upload failed', error: err.message });
     }
+
+    console.log('Body:', req.body);
+    console.log('Files:', req.files);
+
 
     const userId = req.user?.id;
     if (!userId) {
@@ -68,4 +72,25 @@ export const uploadFile = (req, res) => {
       return res.status(500).json({ message: 'Database error', error: dbError.message });
     }
   });
+};
+
+export const getMyFiles = async (req, res) => {
+  const userId = req.user?.id;
+
+  if (!userId) {
+    return res.status(401).json({ message: 'Unauthorized: user ID missing' });
+  }
+
+  try {
+    const result = await pool.query(
+      'SELECT * FROM files WHERE user_id = $1 ORDER BY created_at DESC',
+      [userId]
+    );
+
+    return res.status(200).json({ files: result.rows });
+
+  } catch (err) {
+    console.error("❌ Error fetching files:", err);
+    return res.status(500).json({ message: 'Database error', error: err.message });
+  }
 };

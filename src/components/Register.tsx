@@ -65,7 +65,7 @@ const Register = () => {
         password: formData.password
       }, {
         headers: {
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${localStorage.getItem('token')}`
         }
       });
 

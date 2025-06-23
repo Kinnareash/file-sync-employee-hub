@@ -6,7 +6,7 @@ dotenv.config();
 const verifyToken = (allowedRoles = []) => {
   return (req, res, next) => {
     const authHeader = req.headers['authorization'];
-    const token = authHeader?.split(' ')[1]; // Expect: "Bearer <token>"
+    const token = authHeader?.split(' ')[1]; // "Bearer <token>"
 
     if (!token) {
       return res.status(401).json({ message: 'Access token missing' });

@@ -38,6 +38,7 @@ const Login = () => {
       setToken(token);
       setUser(user);
 
+      localStorage.setItem('token', response.data.token); 
       toast({
         title: 'Login successful',
         description: `Welcome back, ${user.username || user.email}`,

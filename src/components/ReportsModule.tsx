@@ -1,5 +1,5 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -11,7 +11,6 @@ import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 
 interface ReportData {
-  id: string;
   employeeName: string;
   department: string;
   fileType: string;
@@ -25,60 +24,39 @@ const ReportsModule = () => {
   const [selectedFileType, setSelectedFileType] = useState('all');
   const [selectedDepartment, setSelectedDepartment] = useState('all');
   const [datePickerOpen, setDatePickerOpen] = useState(false);
-
-  // Mock data - this will be replaced with actual data from database
-  const reportData: ReportData[] = [
-    {
-      id: '1',
-      employeeName: 'John Doe',
-      department: 'Engineering',
-      fileType: 'Tax Forms',
-      lastUpload: '2024-01-15',
-      status: 'overdue',
-      daysOverdue: 45
-    },
-    {
-      id: '2',
-      employeeName: 'Jane Smith',
-      department: 'HR',
-      fileType: 'Performance Review',
-      lastUpload: '2024-02-20',
-      status: 'compliant'
-    },
-    {
-      id: '3',
-      employeeName: 'Mike Wilson',
-      department: 'Finance',
-      fileType: 'Tax Forms',
-      lastUpload: '2023-12-01',
-      status: 'overdue',
-      daysOverdue: 78
-    },
-    {
-      id: '4',
-      employeeName: 'Sarah Davis',
-      department: 'Marketing',
-      fileType: 'Training Certificate',
-      lastUpload: 'Never',
-      status: 'missing'
-    }
-  ];
+  const [reportData, setReportData] = useState<ReportData[]>([]);
 
   const fileTypes = ['Tax Forms', 'Performance Review', 'Training Certificate', 'HR Documents', 'Contracts'];
   const departments = ['Engineering', 'HR', 'Finance', 'Marketing', 'Sales'];
 
-  const filteredData = reportData.filter(item => {
-    const matchesFileType = selectedFileType === 'all' || item.fileType === selectedFileType;
-    const matchesDepartment = selectedDepartment === 'all' || item.department === selectedDepartment;
-    return matchesFileType && matchesDepartment;
-  });
+  useEffect(() => {
+    const fetchReports = async () => {
+      try {
+        const res = await axios.get('http://localhost:3002/api/reports/compliance', {
+          params: {
+            month: selectedMonth.toISOString(),
+            fileType: selectedFileType,
+            department: selectedDepartment
+          },
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        setReportData(res.data.data);
+      } catch (err) {
+        console.error('Error fetching report:', err);
+      }
+    };
+    fetchReports();
+  }, [selectedMonth, selectedFileType, selectedDepartment]);
+
+  const filteredData = reportData;
 
   const getStatusStats = () => {
     const total = filteredData.length;
     const compliant = filteredData.filter(item => item.status === 'compliant').length;
     const overdue = filteredData.filter(item => item.status === 'overdue').length;
     const missing = filteredData.filter(item => item.status === 'missing').length;
-    
     return { total, compliant, overdue, missing };
   };
 
@@ -123,156 +101,60 @@ const ReportsModule = () => {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-gray-900">Reports Module</h1>
-        <p className="text-gray-600 mt-2">
-          Monitor compliance and generate file submission reports
-        </p>
+        <p className="text-gray-600 mt-2">Monitor compliance and generate file submission reports</p>
       </div>
 
       {/* Summary Statistics */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <Users className="h-5 w-5 text-blue-500" />
-              <div>
-                <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
-                <p className="text-sm text-gray-600">Total Records</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <TrendingUp className="h-5 w-5 text-green-500" />
-              <div>
-                <p className="text-2xl font-bold text-green-600">{stats.compliant}</p>
-                <p className="text-sm text-gray-600">Compliant</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <AlertTriangle className="h-5 w-5 text-red-500" />
-              <div>
-                <p className="text-2xl font-bold text-red-600">{stats.overdue}</p>
-                <p className="text-sm text-gray-600">Overdue</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <FileText className="h-5 w-5 text-orange-500" />
-              <div>
-                <p className="text-2xl font-bold text-orange-600">{stats.missing}</p>
-                <p className="text-sm text-gray-600">Missing</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <Card><CardContent className="p-4"><div className="flex items-center space-x-2"><Users className="h-5 w-5 text-blue-500" /><div><p className="text-2xl font-bold text-gray-900">{stats.total}</p><p className="text-sm text-gray-600">Total Records</p></div></div></CardContent></Card>
+        <Card><CardContent className="p-4"><div className="flex items-center space-x-2"><TrendingUp className="h-5 w-5 text-green-500" /><div><p className="text-2xl font-bold text-green-600">{stats.compliant}</p><p className="text-sm text-gray-600">Compliant</p></div></div></CardContent></Card>
+        <Card><CardContent className="p-4"><div className="flex items-center space-x-2"><AlertTriangle className="h-5 w-5 text-red-500" /><div><p className="text-2xl font-bold text-red-600">{stats.overdue}</p><p className="text-sm text-gray-600">Overdue</p></div></div></CardContent></Card>
+        <Card><CardContent className="p-4"><div className="flex items-center space-x-2"><FileText className="h-5 w-5 text-orange-500" /><div><p className="text-2xl font-bold text-orange-600">{stats.missing}</p><p className="text-sm text-gray-600">Missing</p></div></div></CardContent></Card>
       </div>
 
       {/* Filters and Report Generation */}
       <Card>
         <CardHeader>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
-            <div>
-              <CardTitle>Compliance Report</CardTitle>
-              <CardDescription>
-                Filter and generate compliance reports for file submissions
-              </CardDescription>
-            </div>
-            <Button onClick={exportReport}>
-              <Download className="h-4 w-4 mr-2" />
-              Export CSV
-            </Button>
+            <div><CardTitle>Compliance Report</CardTitle><CardDescription>Filter and generate compliance reports for file submissions</CardDescription></div>
+            <Button onClick={exportReport}><Download className="h-4 w-4 mr-2" />Export CSV</Button>
           </div>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col sm:flex-row gap-4 mb-6">
             <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
               <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "w-full sm:w-64 justify-start text-left font-normal",
-                    !selectedMonth && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {selectedMonth ? format(selectedMonth, "MMMM yyyy") : "Select month"}
-                </Button>
+                <Button variant="outline" className={cn("w-full sm:w-64 justify-start text-left font-normal", !selectedMonth && "text-muted-foreground")}> <CalendarIcon className="mr-2 h-4 w-4" />{selectedMonth ? format(selectedMonth, "MMMM yyyy") : "Select month"}</Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={selectedMonth}
-                  onSelect={(date) => {
-                    setSelectedMonth(date || new Date());
-                    setDatePickerOpen(false);
-                  }}
-                  initialFocus
-                />
+                <Calendar mode="single" selected={selectedMonth} onSelect={(date) => { setSelectedMonth(date || new Date()); setDatePickerOpen(false); }} initialFocus />
               </PopoverContent>
             </Popover>
 
             <Select value={selectedFileType} onValueChange={setSelectedFileType}>
-              <SelectTrigger className="w-full sm:w-48">
-                <SelectValue placeholder="File Type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All File Types</SelectItem>
-                {fileTypes.map((type) => (
-                  <SelectItem key={type} value={type}>
-                    {type}
-                  </SelectItem>
-                ))}
-              </SelectContent>
+              <SelectTrigger className="w-full sm:w-48"><SelectValue placeholder="File Type" /></SelectTrigger>
+              <SelectContent><SelectItem value="all">All File Types</SelectItem>{fileTypes.map(type => (<SelectItem key={type} value={type}>{type}</SelectItem>))}</SelectContent>
             </Select>
 
             <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
-              <SelectTrigger className="w-full sm:w-48">
-                <SelectValue placeholder="Department" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Departments</SelectItem>
-                {departments.map((dept) => (
-                  <SelectItem key={dept} value={dept}>
-                    {dept}
-                  </SelectItem>
-                ))}
-              </SelectContent>
+              <SelectTrigger className="w-full sm:w-48"><SelectValue placeholder="Department" /></SelectTrigger>
+              <SelectContent><SelectItem value="all">All Departments</SelectItem>{departments.map(dept => (<SelectItem key={dept} value={dept}>{dept}</SelectItem>))}</SelectContent>
             </Select>
           </div>
 
           {/* Report Table */}
           <div className="overflow-x-auto">
             <table className="w-full border-collapse">
-              <thead>
-                <tr className="border-b">
-                  <th className="text-left p-4 font-medium text-gray-900">Employee</th>
-                  <th className="text-left p-4 font-medium text-gray-900">Department</th>
-                  <th className="text-left p-4 font-medium text-gray-900">File Type</th>
-                  <th className="text-left p-4 font-medium text-gray-900">Last Upload</th>
-                  <th className="text-left p-4 font-medium text-gray-900">Status</th>
-                  <th className="text-left p-4 font-medium text-gray-900">Days Overdue</th>
-                </tr>
-              </thead>
+              <thead><tr className="border-b"><th className="text-left p-4 font-medium text-gray-900">Employee</th><th className="text-left p-4 font-medium text-gray-900">Department</th><th className="text-left p-4 font-medium text-gray-900">File Type</th><th className="text-left p-4 font-medium text-gray-900">Last Upload</th><th className="text-left p-4 font-medium text-gray-900">Status</th><th className="text-left p-4 font-medium text-gray-900">Days Overdue</th></tr></thead>
               <tbody>
-                {filteredData.map((item) => (
-                  <tr key={item.id} className="border-b hover:bg-gray-50">
+                {filteredData.map((item, index) => (
+                  <tr key={index} className="border-b hover:bg-gray-50">
                     <td className="p-4 font-medium text-gray-900">{item.employeeName}</td>
                     <td className="p-4 text-gray-700">{item.department}</td>
                     <td className="p-4 text-gray-700">{item.fileType}</td>
                     <td className="p-4 text-gray-700">{item.lastUpload}</td>
                     <td className="p-4">{getStatusBadge(item.status)}</td>
-                    <td className="p-4 text-gray-700">
-                      {item.daysOverdue ? `${item.daysOverdue} days` : '-'}
-                    </td>
+                    <td className="p-4 text-gray-700">{item.daysOverdue ? `${item.daysOverdue} days` : '-'}</td>
                   </tr>
                 ))}
               </tbody>

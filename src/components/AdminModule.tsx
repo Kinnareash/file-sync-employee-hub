@@ -29,7 +29,7 @@ interface Employee {
 
 const AdminModule = () => {
   const [employees, setEmployees] = useState<Employee[]>([]);
-  
+
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
@@ -37,59 +37,109 @@ const AdminModule = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-  const fetchEmployees = async () => {
+    const fetchEmployees = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        console.log("🔐Token being sent:", token); // Add this line
+
+        const res = await axios.get('http://localhost:3000/api/admin/employees', {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        setEmployees(res.data);
+      } catch (err) {
+        console.error('Failed to fetch employees:', err);
+        toast({
+          title: 'Error',
+          description: 'Unable to fetch employees.',
+          variant: 'destructive'
+        });
+      }
+    };
+
+    fetchEmployees();
+  }, []);
+
+
+  const safeIncludes = (value: string | null | undefined) =>
+    value?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false;
+
+  const filteredEmployees = employees.filter(employee => {
+    return (
+      safeIncludes(employee.username) ||
+      safeIncludes(employee.email) ||
+      safeIncludes(employee.department)
+    ) && (statusFilter === 'all' || employee.status === statusFilter);
+  });
+
+
+  const updateEmployeeStatus = async (employeeId: string, newStatus: 'active' | 'inactive') => {
     try {
-      const res = await axios.get('http://localhost:3000/api/admin/employees', {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}` 
+      await axios.put(
+        `http://localhost:3000/api/admin/employees/${employeeId}/status`,
+        { status: newStatus },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
         }
+      );
+
+      // Update local state
+      setEmployees(prev =>
+        prev.map(emp =>
+          emp.id === employeeId ? { ...emp, status: newStatus } : emp
+        )
+      );
+
+      toast({
+        title: 'Status Updated',
+        description: `Employee is now ${newStatus}`,
       });
-      setEmployees(res.data);
-    } catch (err) {
-      console.error('Failed to fetch employees:', err);
+    } catch (error) {
+      console.error('Status update failed', error);
       toast({
         title: 'Error',
-        description: 'Unable to fetch employees.',
-        variant: 'destructive'
+        description: 'Failed to update employee status.',
+        variant: 'destructive',
       });
     }
   };
 
-  fetchEmployees();
-}, []);
+  const updateEmployee = async (updatedEmployee: Employee) => {
+    try {
+      await axios.put(
+        `http://localhost:3000/api/admin/employees/${updatedEmployee.id}`,
+        updatedEmployee,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        }
+      );
 
+      // Update state
+      setEmployees(prev =>
+        prev.map(emp => emp.id === updatedEmployee.id ? updatedEmployee : emp)
+      );
 
-  const filteredEmployees = employees.filter(employee => {
-    const matchesSearch = employee.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         employee.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         employee.department.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || employee.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
-
-  const updateEmployeeStatus = (employeeId: string, newStatus: 'active' | 'inactive') => {
-    setEmployees(prev => prev.map(emp => 
-      emp.id === employeeId ? { ...emp, status: newStatus } : emp
-    ));
-    
-    toast({
-      title: 'Employee Status Updated',
-      description: `Employee status changed to ${newStatus}`,
-    });
+      toast({
+        title: 'Employee Updated',
+        description: 'Changes saved successfully.',
+      });
+      setIsDialogOpen(false);
+      setSelectedEmployee(null);
+    } catch (error) {
+      console.error('Update failed', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update employee.',
+        variant: 'destructive',
+      });
+    }
   };
 
-  const updateEmployee = (updatedEmployee: Employee) => {
-    setEmployees(prev => prev.map(emp => 
-      emp.id === updatedEmployee.id ? updatedEmployee : emp
-    ));
-    
-    toast({
-      title: 'Employee Updated',
-      description: 'Employee information has been successfully updated',
-    });
-    setIsDialogOpen(false);
-    setSelectedEmployee(null);
-  };
 
   const handleEditEmployee = (employee: Employee) => {
     setSelectedEmployee(employee);
@@ -155,10 +205,10 @@ const AdminModule = () => {
                 View and manage employee accounts
               </CardDescription>
             </div>
-            <Button>
+            {/* <Button>
               <Plus className="h-4 w-4 mr-2" />
               Add Employee
-            </Button>
+            </Button> */}
           </div>
         </CardHeader>
         <CardContent>
@@ -204,14 +254,14 @@ const AdminModule = () => {
                         <p className="text-sm text-gray-500">{employee.email}</p>
                       </div>
                     </td>
-                    <td className="p-4 text-gray-700">{employee.department|| <span className="text-gray-400 italic">N/A</span>}</td>
+                    <td className="p-4 text-gray-700">{employee.department || <span className="text-gray-400 italic">N/A</span>}</td>
                     <td className="p-4">
                       <Badge variant={employee.role === 'admin' ? 'default' : 'secondary'}>
                         {employee.role}
                       </Badge>
                     </td>
                     <td className="p-4">
-                      <Badge 
+                      <Badge
                         variant={employee.status === 'active' ? 'default' : 'destructive'}
                         className={employee.status === 'active' ? 'bg-green-100 text-green-800' : ''}
                       >
@@ -263,8 +313,8 @@ const AdminModule = () => {
             </DialogDescription>
           </DialogHeader>
           {selectedEmployee && (
-            <EmployeeEditForm 
-              employee={selectedEmployee} 
+            <EmployeeEditForm
+              employee={selectedEmployee}
               onSave={updateEmployee}
               onCancel={() => setIsDialogOpen(false)}
             />
@@ -318,7 +368,7 @@ const EmployeeEditForm = ({ employee, onSave, onCancel }: EmployeeEditFormProps)
       </div>
       <div className="space-y-2">
         <Label htmlFor="role">Role</Label>
-        <Select value={formData.role} onValueChange={(value: 'employee' | 'admin') => 
+        <Select value={formData.role} onValueChange={(value: 'employee' | 'admin') =>
           setFormData(prev => ({ ...prev, role: value }))
         }>
           <SelectTrigger>
@@ -332,7 +382,7 @@ const EmployeeEditForm = ({ employee, onSave, onCancel }: EmployeeEditFormProps)
       </div>
       <div className="space-y-2">
         <Label htmlFor="status">Status</Label>
-        <Select value={formData.status} onValueChange={(value: 'active' | 'inactive') => 
+        <Select value={formData.status} onValueChange={(value: 'active' | 'inactive') =>
           setFormData(prev => ({ ...prev, status: value }))
         }>
           <SelectTrigger>

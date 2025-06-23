@@ -1,9 +1,10 @@
 import express from 'express';
 import verifyToken from '../middleware/authMiddleware.js';
-import { uploadFile } from '../controllers/fileController.js';
+import { uploadFile, getMyFiles } from '../controllers/fileController.js';
 
 const router = express.Router();
 
-router.post('/upload', verifyToken(), uploadFile); // NOT use multer here
+router.get('/mine',verifyToken(),getMyFiles);
+router.post('/upload', verifyToken(), uploadFile); 
 
 export default router;

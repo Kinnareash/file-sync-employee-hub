@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   Card, CardContent, CardDescription, CardHeader, CardTitle
 } from '@/components/ui/card';
@@ -33,6 +33,31 @@ const FileUpload = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const { toast } = useToast();
+
+  useEffect(() => {
+  const fetchFiles = async () => {
+    if (!token) return;
+
+    try {
+      const res = await axios.get('http://localhost:3000/api/files/mine', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setUploadedFiles(res.data.files || []);
+    } catch (err) {
+      console.error('Failed to fetch uploaded files:', err);
+      toast({
+        title: 'Error',
+        description: 'Failed to load recent uploads',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  fetchFiles();
+}, [token]);
+
 
   const fileCategories = [
     'HR Documents',
