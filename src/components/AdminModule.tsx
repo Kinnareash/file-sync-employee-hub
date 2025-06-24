@@ -29,7 +29,6 @@ interface Employee {
 
 const AdminModule = () => {
   const [employees, setEmployees] = useState<Employee[]>([]);
-
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
@@ -40,7 +39,7 @@ const AdminModule = () => {
     const fetchEmployees = async () => {
       try {
         const token = localStorage.getItem('token');
-        console.log("🔐Token being sent:", token); // Add this line
+        console.log("Token being sent:", token); // Add this line
 
         const res = await axios.get('http://localhost:3000/api/admin/employees', {
           headers: {

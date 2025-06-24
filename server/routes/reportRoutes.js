@@ -1,9 +1,9 @@
 import express from 'express';
-import { getComplianceReport } from '../controllers/reportController.js';
+import { getUploadedReport } from '../controllers/reportController.js';
 import verifyToken  from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-router.get('/compliance', verifyToken(['admin']), getComplianceReport);
+router.get('/uploaded', verifyToken(['admin']), getUploadedReport);
 
 export default router;

@@ -26,7 +26,8 @@ const Register = () => {
     role: '',
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    department: ''
   });
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -62,7 +63,8 @@ const Register = () => {
         username: formData.username,
         role: formData.role,
         email: formData.email,
-        password: formData.password
+        password: formData.password,
+        department:formData.department,
       }, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
@@ -79,7 +81,8 @@ const Register = () => {
         role: '',
         email: '',
         password: '',
-        confirmPassword: ''
+        confirmPassword: '',
+        department: ''
       });
     } catch (error: any) {
       toast({
@@ -147,6 +150,26 @@ const Register = () => {
               </select>
             </div>
 
+            <div className="space-y-2">
+              <Label htmlFor="department">Department</Label>
+              <select
+                id="department"
+                name="department"
+                value={formData.department}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, department: e.target.value }))
+                }
+                className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                required={formData.role === 'employee'} // required only for employees
+              >
+                <option value="">Select a department</option>
+                <option value="Engineering">Engineering</option>
+                <option value="HR">HR</option>
+                <option value="Finance">Finance</option>
+                <option value="Marketing">Marketing</option>
+                <option value="Sales">Sales</option>
+              </select>
+            </div>
 
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
@@ -206,14 +229,14 @@ const Register = () => {
             </Button>
           </form>
 
-          <div className="mt-4 text-center">
+          {/* <div className="mt-4 text-center">
             <p className="text-sm text-gray-600">
               Already have an account?{' '}
               <Link to="/login" className="text-blue-600 hover:underline">
                 Sign in here
               </Link>
             </p>
-          </div>
+          </div> */}
         </CardContent>
       </Card>
     </div>

@@ -7,14 +7,17 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 export const register = async (req, res) => {
-  const { username, role, email, password } = req.body;
-  console.log(username, role, email);
+  const { username, role, email, password ,department } = req.body;
+  console.log(username, role, email,department);
   const allowedRoles = ['employee', 'admin'];
   if (!allowedRoles.includes(role)) {
     return res.status(400).json({ error: 'Invalid role' });
   }
   if (!username || !email || !password || !role) {
     return res.status(400).json({ error: 'All fields including role are required' });
+  }
+  if (role === 'employee' && !department) {
+    return res.status(400).json({ error: 'Department is required for employees' });
   }
   try {
     const userExists = await pool.query('SELECT id FROM users WHERE email = $1', [email]);
@@ -23,8 +26,8 @@ export const register = async (req, res) => {
     }
     const hashedPassword = await bcrypt.hash(password, 10);
     const result = await pool.query(
-      'INSERT INTO users (username,role, email, password) VALUES ($1, $2, $3,$4) RETURNING id, username, role, email, status, department',
-      [username, role, email, hashedPassword]
+      'INSERT INTO users (username,role, email, password, department) VALUES ($1, $2, $3, $4, $5) RETURNING id, username, role, email, status, department',
+      [username, role, email, hashedPassword, department]
     );
     // res.status(201).json(result.rows[0]);
     const newUser = result.rows[0];

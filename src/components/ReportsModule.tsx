@@ -15,7 +15,7 @@ interface ReportData {
   department: string;
   fileType: string;
   lastUpload: string;
-  status: 'compliant' | 'overdue' | 'missing';
+  status: 'uploaded' | 'overdue' | 'missing';
   daysOverdue?: number;
 }
 
@@ -32,9 +32,9 @@ const ReportsModule = () => {
   useEffect(() => {
     const fetchReports = async () => {
       try {
-        const res = await axios.get('http://localhost:3002/api/reports/compliance', {
+        const res = await axios.get('http://localhost:3000/api/reports/uploaded', {
           params: {
-            month: selectedMonth.toISOString(),
+            month: selectedMonth.toISOString().slice(0,7),
             fileType: selectedFileType,
             department: selectedDepartment
           },
@@ -54,10 +54,10 @@ const ReportsModule = () => {
 
   const getStatusStats = () => {
     const total = filteredData.length;
-    const compliant = filteredData.filter(item => item.status === 'compliant').length;
+    const uploaded = filteredData.filter(item => item.status === 'uploaded').length;
     const overdue = filteredData.filter(item => item.status === 'overdue').length;
     const missing = filteredData.filter(item => item.status === 'missing').length;
-    return { total, compliant, overdue, missing };
+    return { total, uploaded, overdue, missing };
   };
 
   const stats = getStatusStats();
@@ -79,15 +79,15 @@ const ReportsModule = () => {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `compliance-report-${format(selectedMonth, 'yyyy-MM')}.csv`;
+    a.download = `Uploaded-report-${format(selectedMonth, 'yyyy-MM')}.csv`;
     a.click();
     window.URL.revokeObjectURL(url);
   };
 
   const getStatusBadge = (status: ReportData['status']) => {
     switch (status) {
-      case 'compliant':
-        return <Badge className="bg-green-100 text-green-800">Compliant</Badge>;
+      case 'uploaded':
+        return <Badge className="bg-green-100 text-green-800">Uploaded</Badge>;
       case 'overdue':
         return <Badge variant="destructive">Overdue</Badge>;
       case 'missing':
@@ -101,13 +101,13 @@ const ReportsModule = () => {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-gray-900">Reports Module</h1>
-        <p className="text-gray-600 mt-2">Monitor compliance and generate file submission reports</p>
+        <p className="text-gray-600 mt-2">Monitor upload and generate file submission reports</p>
       </div>
 
       {/* Summary Statistics */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card><CardContent className="p-4"><div className="flex items-center space-x-2"><Users className="h-5 w-5 text-blue-500" /><div><p className="text-2xl font-bold text-gray-900">{stats.total}</p><p className="text-sm text-gray-600">Total Records</p></div></div></CardContent></Card>
-        <Card><CardContent className="p-4"><div className="flex items-center space-x-2"><TrendingUp className="h-5 w-5 text-green-500" /><div><p className="text-2xl font-bold text-green-600">{stats.compliant}</p><p className="text-sm text-gray-600">Compliant</p></div></div></CardContent></Card>
+        <Card><CardContent className="p-4"><div className="flex items-center space-x-2"><TrendingUp className="h-5 w-5 text-green-500" /><div><p className="text-2xl font-bold text-green-600">{stats.uploaded}</p><p className="text-sm text-gray-600">Uploaded</p></div></div></CardContent></Card>
         <Card><CardContent className="p-4"><div className="flex items-center space-x-2"><AlertTriangle className="h-5 w-5 text-red-500" /><div><p className="text-2xl font-bold text-red-600">{stats.overdue}</p><p className="text-sm text-gray-600">Overdue</p></div></div></CardContent></Card>
         <Card><CardContent className="p-4"><div className="flex items-center space-x-2"><FileText className="h-5 w-5 text-orange-500" /><div><p className="text-2xl font-bold text-orange-600">{stats.missing}</p><p className="text-sm text-gray-600">Missing</p></div></div></CardContent></Card>
       </div>
@@ -116,7 +116,7 @@ const ReportsModule = () => {
       <Card>
         <CardHeader>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
-            <div><CardTitle>Compliance Report</CardTitle><CardDescription>Filter and generate compliance reports for file submissions</CardDescription></div>
+            <div><CardTitle>Uploaded Report</CardTitle><CardDescription>Filter and generate upload reports for file submissions</CardDescription></div>
             <Button onClick={exportReport}><Download className="h-4 w-4 mr-2" />Export CSV</Button>
           </div>
         </CardHeader>

@@ -1,29 +1,28 @@
 import { pool } from '../models/db.js';
+import { startOfMonth, endOfMonth } from 'date-fns';
 
-export const getComplianceReport = async (req, res) => {
-  const { month, year, fileType, department } = req.query;
+export const getUploadedReport = async (req, res) => {
+  const { month, fileType = 'all', department = 'all' } = req.query;
 
   try {
-    const filters = [];
-    const values = [];
+    const date = new Date(month); // Format: "2025-06"
+    const startDate = startOfMonth(date);
+    const endDate = endOfMonth(date);
 
-    let index = 1;
+    const values = [startDate, endDate];
+    let index = 3;
+    const filters = [
+      `(f.created_at BETWEEN $1 AND $2 OR f.created_at IS NULL)`
+    ];
 
-    if (fileType && fileType !== 'all') {
-      filters.push(`f.file_type = $${index++}`);
+    if (fileType !== 'all') {
+      filters.push(`(f.category = $${index++} OR f.category IS NULL)`);
       values.push(fileType);
     }
 
-    if (department && department !== 'all') {
+    if (department !== 'all') {
       filters.push(`u.department = $${index++}`);
       values.push(department);
-    }
-
-    if (month && year) {
-      filters.push(`EXTRACT(MONTH FROM f.upload_date) = $${index++}`);
-      values.push(month);
-      filters.push(`EXTRACT(YEAR FROM f.upload_date) = $${index++}`);
-      values.push(year);
     }
 
     const whereClause = filters.length > 0 ? `WHERE ${filters.join(' AND ')}` : '';
@@ -31,30 +30,42 @@ export const getComplianceReport = async (req, res) => {
     const query = `
       SELECT 
         u.id,
-        u.username AS employee_name,
+        u.username AS "employeeName",
         u.department,
-        f.file_type,
-        f.upload_date,
-        CASE 
-          WHEN f.upload_date IS NULL THEN 'missing'
-          WHEN f.upload_date < CURRENT_DATE - INTERVAL '30 days' THEN 'overdue'
-          ELSE 'compliant'
+        f.category AS "fileType",
+        f.created_at AS "lastUpload",
+        CASE
+          WHEN f.created_at IS NULL THEN 'missing'
+          WHEN f.created_at BETWEEN $1 AND $2 THEN 'uploaded'
+          ELSE 'overdue'
         END AS status,
         CASE 
-          WHEN f.upload_date < CURRENT_DATE - INTERVAL '30 days' THEN 
-            DATE_PART('day', CURRENT_DATE - f.upload_date)
+          WHEN f.created_at < $1 THEN 
+            DATE_PART('day', $1::timestamp - f.created_at::timestamp)
           ELSE NULL
-        END AS days_overdue
+        END AS daysOverdue
       FROM users u
-      LEFT JOIN files f ON f.user_id = u.id
+      LEFT JOIN files f 
+        ON f.user_id = u.id
       ${whereClause}
       ORDER BY u.username;
     `;
 
+    console.log('Generated SQL Query:', query);
+    console.log('Query Values:', values);
+
     const result = await pool.query(query, values);
-    res.json(result.rows);
+
+    console.log('Query success');
+    if (result.rows.length > 0) {
+      console.log('Sample row:', result.rows[0]);
+    } else {
+      console.log('No data returned.');
+    }
+
+    res.json({ data: result.rows });
   } catch (error) {
-    console.error('Error fetching compliance report:', error);
-    res.status(500).json({ error: 'Failed to fetch report' });
+    console.error('Error fetching Uploaded report:', error);
+    res.status(500).json({ message: 'Failed to fetch Uploaded report' });
   }
 };
