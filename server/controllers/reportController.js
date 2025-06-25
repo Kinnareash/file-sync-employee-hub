@@ -35,7 +35,7 @@ export const getUploadedReport = async (req, res) => {
         f.category AS "fileType",
         f.created_at AS "lastUpload",
         CASE
-          WHEN f.created_at IS NULL THEN 'missing'
+          WHEN f.created_at IS NULL THEN 'pending'
           WHEN f.created_at BETWEEN $1 AND $2 THEN 'uploaded'
           ELSE 'overdue'
         END AS status,

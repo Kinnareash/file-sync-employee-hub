@@ -15,7 +15,7 @@ interface ReportData {
   department: string;
   fileType: string;
   lastUpload: string;
-  status: 'uploaded' | 'overdue' | 'missing';
+  status: 'uploaded' | 'overdue' | 'pending';
   daysOverdue?: number;
 }
 
@@ -26,7 +26,7 @@ const ReportsModule = () => {
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [reportData, setReportData] = useState<ReportData[]>([]);
 
-  const fileTypes = ['Tax Forms', 'Performance Review', 'Training Certificate', 'HR Documents', 'Contracts'];
+  const fileTypes = ['Tax Forms', 'Performance Review', 'Training Certificate', 'HR Documents', 'Security Scan Report'];
   const departments = ['Engineering', 'HR', 'Finance', 'Marketing', 'Sales'];
 
   useEffect(() => {
@@ -56,8 +56,8 @@ const ReportsModule = () => {
     const total = filteredData.length;
     const uploaded = filteredData.filter(item => item.status === 'uploaded').length;
     const overdue = filteredData.filter(item => item.status === 'overdue').length;
-    const missing = filteredData.filter(item => item.status === 'missing').length;
-    return { total, uploaded, overdue, missing };
+    const pending = filteredData.filter(item => item.status === 'pending').length;
+    return { total, uploaded, overdue, pending };
   };
 
   const stats = getStatusStats();
@@ -90,8 +90,8 @@ const ReportsModule = () => {
         return <Badge className="bg-green-100 text-green-800">Uploaded</Badge>;
       case 'overdue':
         return <Badge variant="destructive">Overdue</Badge>;
-      case 'missing':
-        return <Badge className="bg-orange-100 text-orange-800">Missing</Badge>;
+      case 'pending':
+        return <Badge className="bg-orange-100 text-orange-800">pending</Badge>;
       default:
         return <Badge variant="secondary">Unknown</Badge>;
     }
@@ -109,7 +109,7 @@ const ReportsModule = () => {
         <Card><CardContent className="p-4"><div className="flex items-center space-x-2"><Users className="h-5 w-5 text-blue-500" /><div><p className="text-2xl font-bold text-gray-900">{stats.total}</p><p className="text-sm text-gray-600">Total Records</p></div></div></CardContent></Card>
         <Card><CardContent className="p-4"><div className="flex items-center space-x-2"><TrendingUp className="h-5 w-5 text-green-500" /><div><p className="text-2xl font-bold text-green-600">{stats.uploaded}</p><p className="text-sm text-gray-600">Uploaded</p></div></div></CardContent></Card>
         <Card><CardContent className="p-4"><div className="flex items-center space-x-2"><AlertTriangle className="h-5 w-5 text-red-500" /><div><p className="text-2xl font-bold text-red-600">{stats.overdue}</p><p className="text-sm text-gray-600">Overdue</p></div></div></CardContent></Card>
-        <Card><CardContent className="p-4"><div className="flex items-center space-x-2"><FileText className="h-5 w-5 text-orange-500" /><div><p className="text-2xl font-bold text-orange-600">{stats.missing}</p><p className="text-sm text-gray-600">Missing</p></div></div></CardContent></Card>
+        <Card><CardContent className="p-4"><div className="flex items-center space-x-2"><FileText className="h-5 w-5 text-orange-500" /><div><p className="text-2xl font-bold text-orange-600">{stats.pending}</p><p className="text-sm text-gray-600">pending</p></div></div></CardContent></Card>
       </div>
 
       {/* Filters and Report Generation */}

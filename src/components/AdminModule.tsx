@@ -22,7 +22,7 @@ interface Employee {
   username: string;
   email: string;
   role: 'employee' | 'admin';
-  status: 'active' | 'inactive';
+  user_status: string;
   department: string;
   joinDate: string;
 }
@@ -69,7 +69,7 @@ const AdminModule = () => {
       safeIncludes(employee.username) ||
       safeIncludes(employee.email) ||
       safeIncludes(employee.department)
-    ) && (statusFilter === 'all' || employee.status === statusFilter);
+    ) && (statusFilter === 'all' || employee.user_status === statusFilter);
   });
 
 
@@ -77,7 +77,7 @@ const AdminModule = () => {
     try {
       await axios.put(
         `http://localhost:3000/api/admin/employees/${employeeId}/status`,
-        { status: newStatus },
+        { user_status : newStatus },
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -88,7 +88,7 @@ const AdminModule = () => {
       // Update local state
       setEmployees(prev =>
         prev.map(emp =>
-          emp.id === employeeId ? { ...emp, status: newStatus } : emp
+          emp.id === employeeId ? { ...emp, user_status: newStatus } : emp
         )
       );
 
@@ -167,7 +167,7 @@ const AdminModule = () => {
           <CardContent className="p-4">
             <div className="text-center">
               <p className="text-2xl font-bold text-green-600">
-                {employees.filter(e => e.status === 'active').length}
+                {employees.filter(e => e.user_status === 'active').length}
               </p>
               <p className="text-sm text-gray-600">Active</p>
             </div>
@@ -177,7 +177,7 @@ const AdminModule = () => {
           <CardContent className="p-4">
             <div className="text-center">
               <p className="text-2xl font-bold text-red-600">
-                {employees.filter(e => e.status === 'inactive').length}
+                {employees.filter(e => e.user_status === 'inactive').length}
               </p>
               <p className="text-sm text-gray-600">Inactive</p>
             </div>
@@ -240,7 +240,7 @@ const AdminModule = () => {
                   <th className="text-left p-4 font-medium text-gray-900">Employee</th>
                   <th className="text-left p-4 font-medium text-gray-900">Department</th>
                   <th className="text-left p-4 font-medium text-gray-900">Role</th>
-                  <th className="text-left p-4 font-medium text-gray-900">Status</th>
+                  <th className="text-left p-4 font-medium text-gray-900">User Status</th>
                   <th className="text-left p-4 font-medium text-gray-900">Actions</th>
                 </tr>
               </thead>
@@ -261,10 +261,10 @@ const AdminModule = () => {
                     </td>
                     <td className="p-4">
                       <Badge
-                        variant={employee.status === 'active' ? 'default' : 'destructive'}
-                        className={employee.status === 'active' ? 'bg-green-100 text-green-800' : ''}
+                        variant={employee.user_status === 'active' ? 'default' : 'destructive'}
+                        className={employee.user_status === 'active' ? 'bg-green-100 text-green-800' : ''}
                       >
-                        {employee.status}
+                        {employee.user_status}
                       </Badge>
                     </td>
                     <td className="p-4">
@@ -276,7 +276,7 @@ const AdminModule = () => {
                         >
                           <Edit2 className="h-4 w-4" />
                         </Button>
-                        {employee.status === 'active' ? (
+                        {employee.user_status === 'active' ? (
                           <Button
                             variant="ghost"
                             size="sm"
@@ -380,9 +380,9 @@ const EmployeeEditForm = ({ employee, onSave, onCancel }: EmployeeEditFormProps)
         </Select>
       </div>
       <div className="space-y-2">
-        <Label htmlFor="status">Status</Label>
-        <Select value={formData.status} onValueChange={(value: 'active' | 'inactive') =>
-          setFormData(prev => ({ ...prev, status: value }))
+        <Label htmlFor="user_status">User Status</Label>
+        <Select value={formData.user_status} onValueChange={(value: 'active' | 'inactive') =>
+          setFormData(prev => ({ ...prev, user_status: value }))
         }>
           <SelectTrigger>
             <SelectValue />

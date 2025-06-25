@@ -62,7 +62,7 @@ const FileUpload = () => {
   const fileCategories = [
     'HR Documents',
     'Tax Forms',
-    'Contracts',
+    'Security Scan Report',
     'Performance Reviews',
     'Training Certificates',
     'Medical Records',

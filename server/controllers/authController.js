@@ -31,6 +31,12 @@ export const register = async (req, res) => {
     );
     // res.status(201).json(result.rows[0]);
     const newUser = result.rows[0];
+
+    // await pool.query(
+    //   `INSERT INTO audit_log (user_id, action, description)
+    //    VALUES ($1, 'register', 'New user registered')`,
+    //   [newUser.id]
+    // );
     const token = jwt.sign(
       { id: newUser.id, username: newUser.username, email: newUser.email, role },
       process.env.JWT_SECRET,
@@ -40,14 +46,6 @@ export const register = async (req, res) => {
     res.status(201).json({
       token,
       user:newUser
-      // user: {
-      //   id: newUser.id,
-      //   username: newUser.username,
-      //   email: newUser.email,
-      //   role: newUser.role,
-      //   status: 'active',
-      //   department: ''
-      // }
     });
   } catch (err) {
     console.error('Registration error:', err);
@@ -66,7 +64,7 @@ export const login = async (req, res) => {
   }
 
   try {
-    const userResult = await pool.query('SELECT id, username, role, email,password, status, department FROM users WHERE email = $1', [email]);
+    const userResult = await pool.query('SELECT id, username, role, email,password, user_status, department FROM users WHERE email = $1', [email]);
     const user = userResult.rows[0];
 
     if (!user) return res.status(400).json({ error: 'User not found' });
