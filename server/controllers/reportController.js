@@ -34,16 +34,12 @@ export const getUploadedReport = async (req, res) => {
         u.department,
         f.category AS "fileType",
         f.created_at AS "lastUpload",
+        f.id AS "fileId",
         CASE
           WHEN f.created_at IS NULL THEN 'pending'
           WHEN f.created_at BETWEEN $1 AND $2 THEN 'uploaded'
-          ELSE 'overdue'
-        END AS status,
-        CASE 
-          WHEN f.created_at < $1 THEN 
-            DATE_PART('day', $1::timestamp - f.created_at::timestamp)
-          ELSE NULL
-        END AS daysOverdue
+          ELSE 'uploaded'
+        END AS status
       FROM users u
       LEFT JOIN files f 
         ON f.user_id = u.id

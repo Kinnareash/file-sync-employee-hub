@@ -8,7 +8,8 @@ export const getAllEmployees = async (req, res) => {
         id, 
         username, 
         email, 
-        role, 
+        role,
+        COALESCE(user_status, 'inactive') AS user_status, 
         user_status, 
         department, 
         join_date 
@@ -24,15 +25,15 @@ export const getAllEmployees = async (req, res) => {
 // Update status (active/inactive)
 export const updateEmployeeStatus = async (req, res) => {
   const { id } = req.params;
-  const { status } = req.body;
+  const { user_status } = req.body;
 
   try {
     const result = await pool.query(
       `UPDATE users 
        SET user_status = $1 
        WHERE id = $2 
-       RETURNING id, username, email, role, user_status, department`,  // Avoid RETURNING *
-      [status, id]  // Use 'status' (from frontend) but store as 'user_status'
+       RETURNING id, username, email, role, user_status, department`, 
+      [user_status, id]  
     );
     res.json(result.rows[0]);
   } catch (err) {
@@ -44,7 +45,7 @@ export const updateEmployeeStatus = async (req, res) => {
 // Update full profile info
 export const updateEmployeeInfo = async (req, res) => {
   const { id } = req.params;
-  const { username, email, department, role, status } = req.body;  // Accept 'status' from frontend
+  const { username, email, department, role, user_status } = req.body;  
 
   try {
     const result = await pool.query(
@@ -56,8 +57,8 @@ export const updateEmployeeInfo = async (req, res) => {
          role = $4, 
          user_status = $5  
        WHERE id = $6 
-       RETURNING id, username, email, role, user_status, department`,  // Explicit columns
-      [username, email, department, role, status, id]
+       RETURNING id, username, email, role, user_status, department`,  
+      [username, email, department, role, user_status, id]
     );
     res.json(result.rows[0]);
   } catch (err) {

@@ -22,7 +22,7 @@ interface Employee {
   username: string;
   email: string;
   role: 'employee' | 'admin';
-  user_status: string;
+  user_status:  'active' | 'inactive';
   department: string;
   joinDate: string;
 }

@@ -51,7 +51,7 @@ const Dashboard = () => {
     { title: 'Files Uploaded', value: data.filesUploaded, description: 'This month', icon: FileUp, color: 'text-blue-600' },
     // { title: 'Pending Reviews', value: data.pendingReviews, description: 'Awaiting approval', icon: Clock, color: 'text-yellow-600' },
     // { title: 'Approved Files', value: data.approvedFiles, description: 'Successfully processed', icon: CheckCircle, color: 'text-green-600' },
-    { title: 'Overdue', value: data.overdue, description: 'Requires attention', icon: AlertTriangle, color: 'text-red-600' },
+    // { title: 'Overdue', value: data.overdue, description: 'Requires attention', icon: AlertTriangle, color: 'text-red-600' },
   ];
 
   const adminStats = [
@@ -115,7 +115,8 @@ const Dashboard = () => {
                           {a.filename}
                         </p>
                         <p className="text-xs text-gray-500">
-                          {new Date(a.created_at).toLocaleString()}
+                          {/* {new Date(a.created_at).toLocaleString()} */}
+                           {a.created_at ? new Date(a.created_at).toLocaleString() : 'No date'}
                         </p>
                       </div>
                     </div>

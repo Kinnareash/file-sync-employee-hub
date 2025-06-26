@@ -11,7 +11,7 @@ export const getDashboardSummary = async (req, res) => {
 
     const [
       filesUploaded,
-      overdueFiles,
+      // overdueFiles,
       totalEmployees,
       monthlyReports,
       recentActivity,
@@ -27,14 +27,14 @@ export const getDashboardSummary = async (req, res) => {
       `, userParam),
 
       // Overdue files
-      pool.query(`
-        SELECT COUNT(*) AS c
-          FROM files f
-         WHERE TRUE ${userFilter}
-           AND f.status = 'pending'
-           AND f.due_at IS NOT NULL
-           AND f.due_at < NOW()
-      `, userParam),
+      // pool.query(`
+      //   SELECT COUNT(*) AS c
+      //     FROM files f
+      //    WHERE TRUE ${userFilter}
+      //      AND f.status = 'pending'
+      //      AND f.due_at IS NOT NULL
+      //      AND f.due_at < NOW()
+      // `, userParam),
 
       // Active users
       pool.query(`
@@ -71,7 +71,7 @@ export const getDashboardSummary = async (req, res) => {
 
     const summary = {
       filesUploaded : +filesUploaded.rows[0].c,
-      overdue       : +overdueFiles.rows[0].c,
+      // overdue       : +overdueFiles.rows[0].c,
       totalEmployees: +totalEmployees.rows[0].c,
       monthlyReports: +monthlyReports.rows[0].c,
       recentActivity: recentActivity.rows,
