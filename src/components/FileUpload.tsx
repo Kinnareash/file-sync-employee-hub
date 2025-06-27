@@ -9,9 +9,16 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Upload, File as FileIcon, X } from 'lucide-react';
+import { Eye, Upload, File as FileIcon, X } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore.ts';
 import axios from 'axios';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+
 
 interface UploadedFile {
   id: number;
@@ -23,6 +30,7 @@ interface UploadedFile {
   category: string;
   description: string | null;
   created_at?: string;
+   url?: string;
 }
 
 const FileUpload = () => {
@@ -34,29 +42,32 @@ const FileUpload = () => {
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const { toast } = useToast();
 
+  const [previewFile, setPreviewFile] = useState<UploadedFile | null>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
+
   useEffect(() => {
-  const fetchFiles = async () => {
-    if (!token) return;
+    const fetchFiles = async () => {
+      if (!token) return;
 
-    try {
-      const res = await axios.get('http://localhost:3000/api/files/mine', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      setUploadedFiles(res.data.files || []);
-    } catch (err) {
-      console.error('Failed to fetch uploaded files:', err);
-      toast({
-        title: 'Error',
-        description: 'Failed to load recent uploads',
-        variant: 'destructive',
-      });
-    }
-  };
+      try {
+        const res = await axios.get('http://localhost:3000/api/files/mine', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setUploadedFiles(res.data.files || []);
+      } catch (err) {
+        console.error('Failed to fetch uploaded files:', err);
+        toast({
+          title: 'Error',
+          description: 'Failed to load recent uploads',
+          variant: 'destructive',
+        });
+      }
+    };
 
-  fetchFiles();
-}, [token]);
+    fetchFiles();
+  }, [token]);
 
 
   const fileCategories = [
@@ -77,6 +88,30 @@ const FileUpload = () => {
   const removeFile = (index: number) => {
     setSelectedFiles(prev => prev.filter((_, i) => i !== index));
   };
+
+  const handlePreview = (file: UploadedFile) => {
+  if (!token) {
+    toast({
+      title: 'Authentication Required',
+      description: 'Please login to preview files',
+      variant: 'destructive',
+    });
+    return;
+  }
+
+  // Create authenticated preview URL
+const previewUrl = `http://localhost:3000/api/files/${file.id}/download?token=${token}`;
+  setPreviewFile({ ...file, url: previewUrl });
+  setPreviewOpen(true);
+};
+
+  <iframe 
+  src={`http://localhost:3000/api/files/${previewFile?.id}/download`}
+  className="w-full h-full border-0"
+  title="File Preview"
+  // This ensures cookies/headers are sent with the iframe request
+  allow="credentials"
+/>
 
   const handleUpload = async () => {
     if (selectedFiles.length === 0 || !category) {
@@ -135,6 +170,44 @@ const FileUpload = () => {
       });
     } finally {
       setIsUploading(false);
+    }
+  };
+
+  const handleDelete = async (fileId: number) => {
+    if (!token) {
+      toast({
+        title: 'Authentication Error',
+        description: 'You must be logged in to delete files',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    try {
+      const response = await axios.delete(`http://localhost:3000/api/files/${fileId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.status === 200) {
+        setUploadedFiles(prev => prev.filter(file => file.id !== fileId));
+        toast({ title: 'Success', description: response.data.message });
+      } else {
+        throw new Error(response.data.message || 'Failed to delete file');
+      }
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.error ||
+        err.response?.data?.message ||
+        err.message ||
+        'Failed to delete file';
+
+      toast({
+        title: 'Delete Failed',
+        description: errorMessage,
+        variant: 'destructive',
+      });
     }
   };
 
@@ -253,29 +326,59 @@ const FileUpload = () => {
                 <p className="text-sm">Your uploaded files will appear here</p>
               </div>
             ) : (
-              <div className="space-y-3 max-h-96 overflow-y-auto">
+              <div className="space-y-3 max-h-96 overflow-y-auto px-1">
                 {[...uploadedFiles].reverse().map((file, index) => (
-                  <div key={file.id || index} className="p-3 border rounded-lg">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <FileIcon className="h-4 w-4 text-blue-500" />
-                        <div>
-                          <p className="text-sm font-medium text-gray-900 truncate">{file.filename}</p>
-                          <p className="text-xs text-gray-500">{file.category} • {formatFileSize(file.size)}</p>
-                        </div>
-                      </div>
-                      <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">Uploaded</span>
+                  <div
+                    key={file.id || index}
+                    className="flex items-start justify-between border rounded-lg px-3 py-2 bg-white hover:shadow-sm transition"
+                  >
+                    {/* File Info */}
+                    <div className="flex-1 space-y-0.5 overflow-hidden cursor-pointer"
+                      onClick={() => handlePreview(file)}>
+                      <p className="text-sm font-medium text-gray-900 truncate hover:text-blue-600 hover:underline">{file.filename}</p>
+                      <p className="text-xs text-gray-500 truncate">{file.category} • {formatFileSize(file.size)}</p>
+                      {file.description && (
+                        <p className="text-xs text-gray-600 truncate">{file.description}</p>
+                      )}
                     </div>
-                    {file.description && (
-                      <p className="text-xs text-gray-600 mt-2">{file.description}</p>
-                    )}
+
+                    {/* Badge and Delete */}
+                    <div className="flex flex-col items-end justify-between ml-4 space-y-1">
+                      <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded">Uploaded</span>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-red-500 hover:bg-red-50"
+                        onClick={() => handleDelete(file.id)}
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
                 ))}
               </div>
             )}
           </CardContent>
         </Card>
+
       </div>
+      <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
+        <DialogContent className="max-w-[90vw] h-[90vh]">
+          <DialogHeader>
+            <DialogTitle>{previewFile?.filename}</DialogTitle>
+          </DialogHeader>
+          <div className="h-full overflow-auto">
+            {previewFile && (
+              <iframe
+                src={`http://localhost:3000/api/files/${previewFile.id}/download`}
+                className="w-full h-full border-0"
+                title="File Preview"
+                referrerPolicy="no-referrer"
+              />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

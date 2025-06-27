@@ -32,11 +32,6 @@ export const register = async (req, res) => {
     // res.status(201).json(result.rows[0]);
     const newUser = result.rows[0];
 
-    // await pool.query(
-    //   `INSERT INTO audit_log (user_id, action, description)
-    //    VALUES ($1, 'register', 'New user registered')`,
-    //   [newUser.id]
-    // );
     const token = jwt.sign(
       { id: newUser.id, username: newUser.username, email: newUser.email, role },
       process.env.JWT_SECRET,
@@ -57,7 +52,7 @@ export const register = async (req, res) => {
 
 export const login = async (req, res) => {
   const { email, password } = req.body;
-  console.log('Login attempt:', email, password);
+  // console.log('Login attempt:', email, password);
 
   if (!email || !password) {
     return res.status(400).json({ error: 'Email and password are required' });
@@ -74,7 +69,7 @@ export const login = async (req, res) => {
 
     const { password: _, ...userWithoutPassword } = user;
 
-    const token = jwt.sign({ id: user.id,username:user.username, email: user.email, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ id: user.id,username:user.username, email: user.email, role: user.role }, process.env.JWT_SECRET, { expiresIn: '2h' });
     res.status(200).json({
       token,
       user:userWithoutPassword

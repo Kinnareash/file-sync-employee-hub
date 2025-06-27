@@ -9,8 +9,7 @@ import { CalendarIcon, Download, FileText, Users, TrendingUp, Search } from 'luc
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
+import CustomCalendar from './ui/CustomCalendar';
 
 interface ReportData {
   employeeName: string;
@@ -113,7 +112,7 @@ const ReportsModule = () => {
       );
 
       const cd = headers['content-disposition'] || '';
-      const match = cd.match(/filename="?([^"]+)"?/);
+      const match = cd.match(/filename="?([^\"]+)"?/);
       const filename = match ? decodeURIComponent(match[1]) : `file-${fileId}`;
 
       const blob = new Blob([data], {
@@ -166,33 +165,16 @@ const ReportsModule = () => {
                   )}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {selectedMonth
-                    ? calendarMode === 'month'
-                      ? format(selectedMonth, "MMMM yyyy")
-                      : format(selectedMonth, "PPP")
-                    : "Select date"}
+                  {selectedMonth ? format(selectedMonth, "MMMM yyyy") : "Select date"}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
-                <DatePicker
-                  selected={selectedMonth}
-                  onChange={(date: Date | null) => {
-                    if (date) setSelectedMonth(date);
-                  }}
-                  inline
-                  showMonthYearPicker={calendarMode === 'month'}
-                  dateFormat={calendarMode === 'month' ? "MMMM yyyy" : "P"}
-                  className="border-0"
+                <CustomCalendar
+                  selectedDate={selectedMonth}
+                  onChange={(date) => setSelectedMonth(date)}
                 />
               </PopoverContent>
             </Popover>
-
-            <Button
-              variant="outline"
-              onClick={() => setCalendarMode(mode => mode === 'month' ? 'day' : 'month')}
-            >
-              {calendarMode === 'month' ? 'Switch to Day Picker' : 'Switch to Month Picker'}
-            </Button>
 
             <Select value={selectedFileType} onValueChange={setSelectedFileType}>
               <SelectTrigger className="w-full sm:w-48"><SelectValue placeholder="File Type" /></SelectTrigger>

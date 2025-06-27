@@ -126,3 +126,49 @@ export const downloadFile = async (req, res) => {
     return res.status(500).json({ message: 'Download failed' });
   }
 };
+
+
+export const deleteFile = async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user.id; // From verifyToken middleware
+
+  console.log(` Received request to delete file ID: ${id}`);
+  console.log(` Authenticated user ID: ${userId}`);
+
+  try {
+    console.log(` Checking database for file ${id}...`);
+    const fileResult = await pool.query(
+      'SELECT id, filepath FROM files WHERE id = $1 AND user_id = $2',
+      [id, userId]
+    );
+
+    if (fileResult.rows.length === 0) {
+      console.log('Abort: File not found or not owned by user');
+      return res.status(404).json({ error: 'File not found' });
+    }
+
+    const file = fileResult.rows[0];
+    console.log(`File found in DB: ${file.filepath}`);
+
+    const fullPath = path.resolve(file.filepath);
+    console.log(` Attempting to delete physical file at: ${fullPath}`);
+
+    if (fs.existsSync(fullPath)) {
+      fs.unlinkSync(fullPath);
+      console.log(' Physical file deleted successfully');
+    } else {
+      console.warn(' Warning: Physical file not found (orphaned record)');
+    }
+
+    console.log(` Deleting database record for file ${id}...`);
+    await pool.query('DELETE FROM files WHERE id = $1', [id]);
+    console.log(' Database record deleted');
+
+    return res.json({ success: true });
+
+  } catch (err) {
+    console.error('[ERROR] Delete failed:', err);
+    return res.status(500).json({ error: 'Deletion failed' });
+  }
+};
+
