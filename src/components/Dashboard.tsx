@@ -49,9 +49,6 @@ const Dashboard = () => {
 
   const stats = [
     { title: 'Files Uploaded', value: data.filesUploaded, description: 'This month', icon: FileUp, color: 'text-blue-600' },
-    // { title: 'Pending Reviews', value: data.pendingReviews, description: 'Awaiting approval', icon: Clock, color: 'text-yellow-600' },
-    // { title: 'Approved Files', value: data.approvedFiles, description: 'Successfully processed', icon: CheckCircle, color: 'text-green-600' },
-    // { title: 'Overdue', value: data.overdue, description: 'Requires attention', icon: AlertTriangle, color: 'text-red-600' },
   ];
 
   const adminStats = [
@@ -75,8 +72,7 @@ const Dashboard = () => {
           Here's an overview of your file management system
         </p>
       </div>
-
-      {/* TOP STAT CARDS */}
+ 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {displayStats.map(({ title, value, description, icon: Icon, color }, i) => (
           <Card key={i} className="hover:shadow-lg transition-shadow">
@@ -91,10 +87,8 @@ const Dashboard = () => {
           </Card>
         ))}
       </div>
-
-      {/* RECENT ACTIVITY */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* RECENT ACTIVITY */}
+ 
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6"> 
         <Card>
           <CardHeader>
             <CardTitle>Recent Activity</CardTitle>
@@ -114,9 +108,8 @@ const Dashboard = () => {
                         <p className="text-sm font-medium text-gray-900">
                           {a.filename}
                         </p>
-                        <p className="text-xs text-gray-500">
-                          {/* {new Date(a.created_at).toLocaleString()} */}
-                           {a.created_at ? new Date(a.created_at).toLocaleString() : 'No date'}
+                        <p className="text-xs text-gray-500"> 
+                          {a.created_at ? new Date(a.created_at).toLocaleString() : 'No date'}
                         </p>
                       </div>
                     </div>

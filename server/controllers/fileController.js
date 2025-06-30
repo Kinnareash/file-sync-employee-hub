@@ -3,7 +3,6 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 
-// Setup Multer storage
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const uploadDir = 'uploads/';
@@ -19,8 +18,6 @@ const storage = multer.diskStorage({
 
 const uploadMiddleware = multer({ storage }).array('files');
 
-// Exported controller
-// const upload = multer({ storage }).array('files');
 export const uploadFile = (req, res) => {
   console.log("📦 Upload endpoint called");
 
@@ -130,7 +127,7 @@ export const downloadFile = async (req, res) => {
 
 export const deleteFile = async (req, res) => {
   const { id } = req.params;
-  const userId = req.user.id; // From verifyToken middleware
+  const userId = req.user.id;  
 
   console.log(` Received request to delete file ID: ${id}`);
   console.log(` Authenticated user ID: ${userId}`);

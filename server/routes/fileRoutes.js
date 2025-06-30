@@ -18,7 +18,7 @@ router.post('/upload', verifyToken(), uploadFile);
 // Route to download a file
 router.get('/:id/download', verifyToken(), downloadFile);
 
-// Route to delete a file - FIXED (added parentheses for verifyToken)
+// Route to delete a file
 router.delete('/:id', verifyToken(), deleteFile);
 
 export default router;

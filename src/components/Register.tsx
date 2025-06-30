@@ -13,12 +13,12 @@ import { useAuthStore } from '@/stores/authStore';
 
 
 const Register = () => {
-  const { token, user } = useAuthStore(); // get auth info from store
+  const { token, user } = useAuthStore();
   const navigate = useNavigate();
 
   useEffect(() => {
     if (!token || user?.role !== 'admin') {
-      navigate('/login'); // or navigate('/')
+      navigate('/login');
     }
   }, [token, user, navigate]);
   const [formData, setFormData] = useState({
@@ -57,14 +57,14 @@ const Register = () => {
     }
 
     try {
-      const token = localStorage.getItem('token'); // Or get it from Zustand store
+      const token = localStorage.getItem('token');
 
       await axios.post('http://localhost:3000/api/auth/register', {
         username: formData.username,
         role: formData.role,
         email: formData.email,
         password: formData.password,
-        department:formData.department,
+        department: formData.department,
       }, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
@@ -160,7 +160,7 @@ const Register = () => {
                   setFormData((prev) => ({ ...prev, department: e.target.value }))
                 }
                 className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
-                required={formData.role === 'employee'} // required only for employees
+                required={formData.role === 'employee'}
               >
                 <option value="">Select a department</option>
                 <option value="Engineering">Engineering</option>
@@ -228,15 +228,6 @@ const Register = () => {
               {isLoading ? 'Creating Account...' : 'Create Account'}
             </Button>
           </form>
-
-          {/* <div className="mt-4 text-center">
-            <p className="text-sm text-gray-600">
-              Already have an account?{' '}
-              <Link to="/login" className="text-blue-600 hover:underline">
-                Sign in here
-              </Link>
-            </p>
-          </div> */}
         </CardContent>
       </Card>
     </div>

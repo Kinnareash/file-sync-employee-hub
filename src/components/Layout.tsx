@@ -3,11 +3,11 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/stores/authStore';
-import { 
-  FileUp, 
-  Users, 
-  BarChart3, 
-  Home, 
+import {
+  FileUp,
+  Users,
+  BarChart3,
+  Home,
   LogOut,
   Menu
 } from 'lucide-react';
@@ -46,11 +46,10 @@ const Layout = ({ children }: LayoutProps) => {
           <Link
             key={item.name}
             to={item.href}
-            className={`flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-              isActive
+            className={`flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-colors ${isActive
                 ? 'bg-blue-100 text-blue-700'
                 : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-            }`}
+              }`}
           >
             <Icon className="mr-3 h-5 w-5" />
             {item.name}
@@ -62,7 +61,6 @@ const Layout = ({ children }: LayoutProps) => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Mobile sidebar */}
       <Sheet>
         <div className="lg:hidden">
           <div className="flex items-center justify-between p-4 bg-white shadow">
@@ -99,7 +97,6 @@ const Layout = ({ children }: LayoutProps) => {
         </SheetContent>
       </Sheet>
 
-      {/* Desktop sidebar */}
       <div className="hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-0">
         <div className="flex flex-col flex-grow bg-white shadow-lg">
           <div className="px-6 py-6">
@@ -124,7 +121,6 @@ const Layout = ({ children }: LayoutProps) => {
         </div>
       </div>
 
-      {/* Main content */}
       <div className="lg:pl-64">
         <main className="p-6">
           {children}

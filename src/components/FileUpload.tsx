@@ -88,7 +88,7 @@ const FileUpload = () => {
     }
 
     const fileUrl = `http://localhost:3000/api/files/${file.id}/download?token=${token}`;
-    
+
     const a = document.createElement('a');
     a.href = fileUrl;
     a.download = file.filename;
@@ -320,7 +320,7 @@ const FileUpload = () => {
                     className="flex items-start justify-between border rounded-lg px-3 py-2 bg-white hover:shadow-sm transition"
                   >
                     {/* File Info */}
-                    <div 
+                    <div
                       className="flex-1 space-y-0.5 overflow-hidden cursor-pointer"
                       onClick={() => handleDownload(file)}
                     >

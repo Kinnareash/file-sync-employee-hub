@@ -20,7 +20,7 @@ const verifyToken = (allowedRoles = []) => {
       req.user = decoded;
       next();
     } catch (err) {
-      console.error("Token verification failed:", err.message); // 👈 ADD THIS
+      console.error("Token verification failed:", err.message); 
       return res.status(403).json({ message: 'Invalid or expired token' });
     }
   };

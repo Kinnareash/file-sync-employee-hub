@@ -28,8 +28,8 @@ const Login = () => {
       });
 
       const { token, user } = response.data;
-      console.log("Login response:");         
-      console.log("Token:", token);            
+      console.log("Login response:");
+      console.log("Token:", token);
       console.log("User:", user);
       if (!token || !user) {
         throw new Error("Invalid login response");
@@ -38,13 +38,13 @@ const Login = () => {
       setToken(token);
       setUser(user);
 
-      localStorage.setItem('token', response.data.token); 
+      localStorage.setItem('token', response.data.token);
       toast({
         title: 'Login successful',
         description: `Welcome back, ${user.username || user.email}`,
       });
 
-      navigate('/dashboard'); // Redirect after login
+      navigate('/dashboard');
     } catch (error: any) {
       toast({
         title: 'Login failed',
@@ -107,16 +107,8 @@ const Login = () => {
           <div className="mt-4 text-center">
             <p className="text-sm text-gray-600">
               Don't have an account?{' '}
-              <Link to="/register" className="text-blue-600 hover:underline">
-                Create one here
-              </Link>
+              <span>Contact your administrator</span>
             </p>
-            {/* </div>
-
-          <div className="mt-4 text-center text-sm text-gray-600">
-            <p>Demo credentials:</p>
-            <p>Username: <code className="bg-gray-100 px-1 rounded">admin</code> or <code className="bg-gray-100 px-1 rounded">employee</code></p>
-            <p>Password: <code className="bg-gray-100 px-1 rounded">your password</code></p> */}
           </div>
         </CardContent>
       </Card>

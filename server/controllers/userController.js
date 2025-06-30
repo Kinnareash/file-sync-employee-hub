@@ -1,4 +1,3 @@
-// controllers/userController.js
 import { pool } from '../models/db.js';
 
 export const getAllUsers = async (req, res) => {

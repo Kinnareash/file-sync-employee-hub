@@ -8,9 +8,9 @@ export default defineConfig({
     port: 8080,  
      proxy: {
       '/api': {
-        target: 'http://localhost:3000', // port where Express is running
-        changeOrigin: true,              // needed for virtual hosts & CORS
-        secure: false,                   // allow self-signed HTTPS in dev
+        target: 'http://localhost:3000',  
+        changeOrigin: true,               
+        secure: false,                    
       },
     },
   },

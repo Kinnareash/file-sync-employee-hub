@@ -39,7 +39,7 @@ const AdminModule = () => {
     const fetchEmployees = async () => {
       try {
         const token = localStorage.getItem('token');
-        console.log("Token being sent:", token); // Add this line
+        console.log("Token being sent:", token); 
 
         const res = await axios.get('http://localhost:3000/api/admin/employees', {
           headers: {
