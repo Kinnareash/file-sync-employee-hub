@@ -74,7 +74,7 @@ const ReportsModule = () => {
       ...filteredData.map(item => [
         item.employeeName,
         item.department,
-        item.fileType,
+        item.fileType, 
         item.lastUpload,
         item.status,
         item.fileId?.toString() || ''
@@ -207,7 +207,7 @@ const ReportsModule = () => {
                     <td className="p-4 font-medium text-gray-900">{item.employeeName}</td>
                     <td className="p-4 text-gray-700">{item.department}</td>
                     <td className="p-4 text-gray-700">{item.fileType}</td>
-                    <td className="p-4 text-gray-700">{item.lastUpload}</td>
+                    <td className="p-4 text-gray-700"> {item.lastUpload ? format(new Date(item.lastUpload), 'dd-MM-yyyy') : '—'}</td>
                     <td className="p-4">{getStatusBadge(item.status)}</td>
                     <td className="p-4">
                       {item.status === 'uploaded' && item.fileId ? (

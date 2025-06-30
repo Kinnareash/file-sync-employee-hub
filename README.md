@@ -39,6 +39,16 @@ Backend:
  
  - Make sure the uploads/ folder exists in the root of the project (or it will be created automatically by Multer on file upload).
 
+ # Database Setup
+ -  Create a PostgreSQL database (e.g., `auth1`)
+ -  From the `/server` directory, run:
+ 
+   psql -U postgres -d auth1 -f schema.sql
+
+   Replace `postgres` and `auth1` with your actual username and database name if different.
+
+ -  Copy `.env.example` to `.env` and update the credentials
+
 To run the app
  # Backend
  - cd server

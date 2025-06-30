@@ -9,16 +9,9 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Eye, Upload, File as FileIcon, X } from 'lucide-react';
+import { Upload, File as FileIcon, X } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore.ts';
 import axios from 'axios';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-
 
 interface UploadedFile {
   id: number;
@@ -30,7 +23,6 @@ interface UploadedFile {
   category: string;
   description: string | null;
   created_at?: string;
-   url?: string;
 }
 
 const FileUpload = () => {
@@ -42,8 +34,15 @@ const FileUpload = () => {
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const { toast } = useToast();
 
-  const [previewFile, setPreviewFile] = useState<UploadedFile | null>(null);
-  const [previewOpen, setPreviewOpen] = useState(false);
+  const fileCategories = [
+    'HR Documents',
+    'Tax Forms',
+    'Security Scan Report',
+    'Performance Reviews',
+    'Training Certificates',
+    'Medical Records',
+    'Other'
+  ];
 
   useEffect(() => {
     const fetchFiles = async () => {
@@ -69,17 +68,6 @@ const FileUpload = () => {
     fetchFiles();
   }, [token]);
 
-
-  const fileCategories = [
-    'HR Documents',
-    'Tax Forms',
-    'Security Scan Report',
-    'Performance Reviews',
-    'Training Certificates',
-    'Medical Records',
-    'Other'
-  ];
-
   const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     setSelectedFiles(prev => [...prev, ...files]);
@@ -89,29 +77,30 @@ const FileUpload = () => {
     setSelectedFiles(prev => prev.filter((_, i) => i !== index));
   };
 
-  const handlePreview = (file: UploadedFile) => {
-  if (!token) {
+  const handleDownload = (file: UploadedFile) => {
+    if (!token) {
+      toast({
+        title: 'Authentication Required',
+        description: 'Please login to download files',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    const fileUrl = `http://localhost:3000/api/files/${file.id}/download?token=${token}`;
+    
+    const a = document.createElement('a');
+    a.href = fileUrl;
+    a.download = file.filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+
     toast({
-      title: 'Authentication Required',
-      description: 'Please login to preview files',
-      variant: 'destructive',
+      title: 'Download Started',
+      description: `${file.filename} is being downloaded`,
     });
-    return;
-  }
-
-  // Create authenticated preview URL
-const previewUrl = `http://localhost:3000/api/files/${file.id}/download?token=${token}`;
-  setPreviewFile({ ...file, url: previewUrl });
-  setPreviewOpen(true);
-};
-
-  <iframe 
-  src={`http://localhost:3000/api/files/${previewFile?.id}/download`}
-  className="w-full h-full border-0"
-  title="File Preview"
-  // This ensures cookies/headers are sent with the iframe request
-  allow="credentials"
-/>
+  };
 
   const handleUpload = async () => {
     if (selectedFiles.length === 0 || !category) {
@@ -137,12 +126,10 @@ const previewUrl = `http://localhost:3000/api/files/${file.id}/download?token=${
     try {
       const formData = new FormData();
       selectedFiles.forEach(file => {
-        formData.append('files', file)
+        formData.append('files', file);
       });
       formData.append('category', category);
       formData.append('description', description);
-
-      console.log([...formData.entries()])
 
       const response = await axios.post('http://localhost:3000/api/files/upload', formData, {
         headers: {
@@ -333,10 +320,16 @@ const previewUrl = `http://localhost:3000/api/files/${file.id}/download?token=${
                     className="flex items-start justify-between border rounded-lg px-3 py-2 bg-white hover:shadow-sm transition"
                   >
                     {/* File Info */}
-                    <div className="flex-1 space-y-0.5 overflow-hidden cursor-pointer"
-                      onClick={() => handlePreview(file)}>
-                      <p className="text-sm font-medium text-gray-900 truncate hover:text-blue-600 hover:underline">{file.filename}</p>
-                      <p className="text-xs text-gray-500 truncate">{file.category} • {formatFileSize(file.size)}</p>
+                    <div 
+                      className="flex-1 space-y-0.5 overflow-hidden cursor-pointer"
+                      onClick={() => handleDownload(file)}
+                    >
+                      <p className="text-sm font-medium text-gray-900 truncate hover:text-blue-600 hover:underline">
+                        {file.filename}
+                      </p>
+                      <p className="text-xs text-gray-500 truncate">
+                        {file.category} • {formatFileSize(file.size)}
+                      </p>
                       {file.description && (
                         <p className="text-xs text-gray-600 truncate">{file.description}</p>
                       )}
@@ -344,7 +337,9 @@ const previewUrl = `http://localhost:3000/api/files/${file.id}/download?token=${
 
                     {/* Badge and Delete */}
                     <div className="flex flex-col items-end justify-between ml-4 space-y-1">
-                      <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded">Uploaded</span>
+                      <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded">
+                        Uploaded
+                      </span>
                       <Button
                         variant="ghost"
                         size="icon"
@@ -360,25 +355,7 @@ const previewUrl = `http://localhost:3000/api/files/${file.id}/download?token=${
             )}
           </CardContent>
         </Card>
-
       </div>
-      <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
-        <DialogContent className="max-w-[90vw] h-[90vh]">
-          <DialogHeader>
-            <DialogTitle>{previewFile?.filename}</DialogTitle>
-          </DialogHeader>
-          <div className="h-full overflow-auto">
-            {previewFile && (
-              <iframe
-                src={`http://localhost:3000/api/files/${previewFile.id}/download`}
-                className="w-full h-full border-0"
-                title="File Preview"
-                referrerPolicy="no-referrer"
-              />
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };
